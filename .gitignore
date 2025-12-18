@@ -1,0 +1,4 @@
+maji_ussd/
+__pycache__/
+*.pyc
+.env
