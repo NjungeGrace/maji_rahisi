@@ -16,11 +16,12 @@ def gen_homepage():
 def eng_homepage():
     return "\n".join([
         "CON Welcome to Maji Rahisi!",
-        "1.Check water prices",
-        "2.Report an issue",
-        "3.Find water locations near you",
-        "4.About Maji rahisi",
-        "00. Homepage"  
+        "1. Check water prices",
+        "2. Report an issue",
+        "3. Find water locations near you",
+        "4. About Maji rahisi",
+        "00. Homepage",
+        "e. exit", 
     ])
 def kis_homepage():
      return "\n".join([
@@ -29,7 +30,8 @@ def kis_homepage():
         "2. Ripoti tatizo",
         "3. Pata maeneo ya maji yaliyo karibu nawe",
         "4. Kuhusu Maji Rahisi",
-        "00. Homepage"
+        "00. Rudi Mwanzo",
+        "e. exit"
      ])
 
 def sheng_homepage():
@@ -39,7 +41,8 @@ def sheng_homepage():
         "2. Tuma noma",
         "3. Pata spot za maji karibu na wewe",
         "4. Story ya Maji Rahisi",
-        "00. Homepage"
+        "00. Rudi homepage",
+        "e. exit"
      ])
 
 def prices(price_intro):
@@ -49,7 +52,8 @@ def prices(price_intro):
         "Kwa Njenga: 16/-",
         "Kwa Reuben: 13/-",
         "Viwandani: 18/-",
-        "0.return"
+        "0.return",
+        "e.exit"
     ])
 
 def eng_issue():
@@ -57,21 +61,24 @@ def eng_issue():
         "CON 1.Poor quality water",
         "2.Water is unavailable",
         "3.extremely high prices",
-        "0.return"
+        "0.return",
+        "e.exit"
      ])
 def kis_issue():
      return"\n".join([
         "CON 1. Maji yana ubora duni",
         "2. Maji hayapatikani",
         "3. Bei ni za juu sana",
-        "0. Rudi"
+        "0. Rudi",
+        "e. exit"
      ])
 def sheng_issue():
      return"\n".join([
        "CON 1. Maji ni trash kabisa",
         "2. Maji hakuna ata kidogo",
         "3. Bei ni crazy juu",
-        "0. Rudi nyuma"
+        "0. Rudi nyuma",
+        "e. exit"
      ])
 def locations():
      return "\n".join([
@@ -79,17 +86,34 @@ def locations():
          "Kwa Reuben",
          "Kwa Njenga",
          "Viwandani",
-         "0.Return"
+         "0.Return",
+         "e.exit"
      ])
 
 def eng_about():
-     return "END Maji rahisi is an app that helps you locate reliable water sources near you and find the best prices in real time."  
+     return "\n".join([
+            "CON Maji rahisi is an app that helps you locate reliable water sources near you and find the best prices in real time.",
+            "0.Return",
+            "e.exit"
+        ])
 def kis_about():
-     return "END Maji Rahisi ni app inayokusaidia kupata vyanzo vya maji vinavyoaminika karibu nawe na kujua bei nafuu kwa wakati halisi."
+     return "\n".join([
+           "CON Maji Rahisi ni app inayokusaidia kupata vyanzo vya maji vinavyoaminika karibu nawe na kujua bei nafuu kwa wakati halisi.",
+            "0.Return",
+            "e. exit"
+        ])
 def sheng_about():
-     return"END Maji Rahisi ni app inakuonyesha spot legit za maji karibu na wewe na kukusaidia kupata bei poa real time."
+     return "\n".join([
+           "CON Maji Rahisi ni app inayokusaidia kupata vyanzo vya maji vinavyoaminika karibu nawe na kujua bei nafuu kwa wakati halisi.",
+            "0.Return",
+            "e. exit"
+        ])
 def issue_confirmation(issue_message):
-     return issue_message
+     return "\n".join([
+            issue_message,
+            "0.Return",
+            "e.exit"
+        ])
 
 #setting up the routes
 @app.route("/ussd", methods = ["POST"])
@@ -97,6 +121,22 @@ def issue_confirmation(issue_message):
 #main function containing the logic
 def maji_main():
     text = request.form.get("text", "")
+    if "00" in text and "0" != text[len(text)-2] and "0" != text[len(text)-1]:
+        text = text[text.rfind("00")+3:]
+
+    if "00" in text and "0" == text[len(text)-2] and "0" == text[len(text)-1]:
+        text = ""
+
+    if "0" in text and "0" != text[len(text)-1]:
+        text = text[0] + text[text.rfind("0")+1:]
+
+    if "0" in text and "0" == text[len(text)-1]:
+        if text.rfind("00") == -1:
+                text = text[0]
+
+        else:
+            text = text[text.rfind("00")+3]
+
     if text == "":
         return gen_homepage()
     elif text == "1":
@@ -106,13 +146,11 @@ def maji_main():
     elif text == "1*2":
         return eng_issue()
     elif text in ["1*2*1", "1*2*2", "1*2*3"]:
-        return issue_confirmation("END issue reported, it will be resolved soon")
+        return issue_confirmation("CON issue reported, it will be resolved soon")
     elif text in ["1*3", "2*3", "3*3"]:
         return locations()
     elif text == "1*4":
         return eng_about()
-    elif text in ["1*1*0", "1*2*0", "1*3*0", "1*4*0"]:
-        return eng_homepage()
     elif text == "2":
         return kis_homepage()
     elif text == "2*1":
@@ -121,35 +159,34 @@ def maji_main():
         return kis_issue()
     elif text in ["2*2*1", "2*2*2", "2*2*3"]:
         return issue_confirmation(
-            "END tumepokea malalamiko yako na tunaendelea kuyashughulikia kwa haraka."
+            "CON tumepokea malalamiko yako na tunaendelea kuyashughulikia kwa haraka."
         )
     elif text == "2*4":
-        return kis_about()
-    elif text in ["2*1*0", "2*2*0", "2*3*0", "2*4*0"]:
-        return kis_homepage()
+        return kis_about()        
     elif text == "3":
         return sheng_homepage()
     elif text == "3*1":
-        return prices("END Hizi bei ni za jerican ya 20L tu, usichanganye.")
+        return prices("CON Hizi bei ni za jerican ya 20L tu, usichanganye.")
     elif text == "3*2":
         return sheng_issue()
     elif text in ["3*2*1", "3*2*2", "3*2*3"]:
         return issue_confirmation(
-            "END Issue yako imeshika, iko kwa system na tunashughulikia mbio"
+            "CON Issue yako imeshika, iko kwa system na tunashughulikia mbio"
         )
     elif text == "3*4":
         return sheng_about()
-    elif text in ["3*1*0", "3*2*0", "3*3*0", "3*4*0"]:
-        return sheng_homepage()
-    elif text == "00":
-        return gen_homepage()
+    elif "e" in text and text[0] == "1" :
+        return "END Thank you so much for using Maji Rahisi!"
+    elif "e" in text and text[0] == "2" :
+        return "END Asanti kwa kutumia Maji Rahisi!"
+    elif "e" in text and text[0] == "3" :
+        return "END Sa Jah akubless ju ya ku use Maji Rahisi!"
     else:
         return "\n".join([
             "CON Invalid choice",
             gen_homepage().replace("CON ", "")
         ])
 
-    
 #run the flask app
 if __name__ == "__main__":
     app.run(port = 5000)
